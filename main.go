@@ -6,6 +6,7 @@ import (
     "net/url"
     "fmt"
     "bytes"
+    "os"
 )
 
 func PostUriString (strUrl string , postDict map[string]string) string {
@@ -27,7 +28,7 @@ func PostUriString (strUrl string , postDict map[string]string) string {
     httpResp, err := client.Do(httpReq)
     if err != nil {
       fmt.Println("error do")
-      return ""
+      return strUrl
     }
 
     defer httpResp.Body.Close()
@@ -41,7 +42,23 @@ func PostUriString (strUrl string , postDict map[string]string) string {
 
 func main() {
     postDict := map[string]string{}
-    uri := "http://www.baidu.com/"
+    userFile := "./config.txt"
+    uri      := ""
 
-    fmt.Println("fmt: ", PostUriString(uri, postDict))
+    fout, err := os.Open(userFile)
+    if err != nil {
+        fmt.Println(userFile, err)
+        return
+    }
+    defer fout.Close()
+    buf := make([]byte, 1024)
+    for {
+        n, _ := fout.Read(buf)
+        if 0 == n {
+            break
+        }
+        os.Stdout.Write(buf[:n])
+        uri = string(buf[:n])
+        fmt.Println("fmt: ", PostUriString(uri, postDict))
+    }
 }
